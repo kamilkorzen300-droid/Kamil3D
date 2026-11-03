@@ -1,152 +1,520 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kamil3D.pl</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kamil3D – Druk 3D</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#101116;color:#fff;font-family:Arial,sans-serif}
-header{background:#191a22;padding:22px;text-align:center;border-bottom:1px solid #333}
-header h1{color:#9b85ff;margin:0;font-size:32px}
-nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:15px}
-button,select{background:#8065ff;color:white;border:0;border-radius:9px;padding:11px;cursor:pointer}
-button:hover{background:#6548df}
-main{max-width:1100px;margin:auto;padding:20px}
-h2{color:#b5a5ff}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:17px}
-.card,.panel{background:#20212b;border:1px solid #343542;border-radius:15px;padding:17px}
-.card{text-align:center}
-.picture{font-size:65px;padding:15px}
-.price{color:#b6a5ff;font-weight:bold;font-size:20px}
-.colors{display:flex;justify-content:center;gap:8px;margin:12px}
-.color{width:23px;height:23px;border-radius:50%;border:2px solid white;cursor:pointer}
-#cart,#owner,#coupons{margin-top:25px}
-#owner{display:none}
-input{padding:10px;border-radius:8px;border:1px solid #555;background:#14151b;color:white}
-small{color:#aaa}
+:root {
+  --bg:#080b10;
+  --card:#111923;
+  --blue:#168cff;
+  --blue2:#0066cc;
+  --text:#ffffff;
+  --muted:#aab8c8;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+header {
+  text-align:center;
+  padding:25px 12px;
+  background:#0d141e;
+  border-bottom:2px solid var(--blue);
+}
+header h1 { margin:0; font-size:34px; color:#249aff; }
+header p { color:var(--muted); }
+nav {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:9px;
+  padding:15px;
+  background:#0b111a;
+}
+button {
+  background:var(--blue2);
+  color:white;
+  border:0;
+  padding:12px 16px;
+  border-radius:9px;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:15px;
+}
+button:hover { background:var(--blue); }
+.secondary { background:#263343; }
+main { max-width:1100px; margin:auto; padding:16px; }
+.page { display:none; }
+.page.active { display:block; }
+h2 { color:#249aff; }
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:15px;
+}
+.card {
+  background:var(--card);
+  padding:15px;
+  border:1px solid #263c53;
+  border-radius:13px;
+}
+.product-icon { font-size:55px; text-align:center; padding:15px; }
+.card h3 { text-align:center; }
+.price {
+  color:#43aaff;
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+}
+label { display:block; margin:12px 0 6px; }
+
+input,select,textarea {
+  display:block;
+  width:100%;
+  padding:14px;
+  border-radius:8px;
+  border:1px solid #2879bb;
+  background:#080e16;
+  color:#fff;
+  font-size:16px;
+  opacity:1;
+  pointer-events:auto;
+  -webkit-user-select:text;
+  user-select:text;
+}
+input {
+  -webkit-appearance:none;
+  appearance:none;
+}
+input::placeholder,textarea::placeholder {
+  color:#aab8c8;
+  opacity:1;
+}
+#couponInput {
+  color:#ffffff !important;
+  background:#080e16 !important;
+  -webkit-text-fill-color:#ffffff !important;
+  caret-color:#249aff;
+  font-size:18px;
+  opacity:1 !important;
+  pointer-events:auto !important;
+  user-select:text !important;
+  -webkit-user-select:text !important;
+  position:relative;
+  z-index:20;
+}
+textarea { min-height:80px; }
+.row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.row > * { flex:1; }
+.item { padding:13px; border-bottom:1px solid #263c53; }
+.modal {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  z-index:10000;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+.modal.show { display:flex; }
+.modal-box {
+  position:relative;
+  z-index:10001;
+  pointer-events:auto;
+  background:#111923;
+  border:2px solid var(--blue);
+  border-radius:15px;
+  padding:22px;
+  width:100%;
+  max-width:430px;
+  max-height:90vh;
+  overflow:auto;
+}
+.modal-box input {
+  pointer-events:auto;
+  position:relative;
+  z-index:10002;
+}
+.close { float:right; background:#263343; }
+.notice {
+  background:#102b43;
+  padding:13px;
+  border-radius:9px;
+  margin:12px 0;
+}
+footer { text-align:center; color:var(--muted); padding:30px; }
+a { color:#43aaff; }
 </style>
 </head>
 <body>
+
 <header>
-<h1>✨ Kamil3D.pl</h1>
-<p>Wyjątkowe wydruki 3D</p>
-<nav>
-<button onclick="show('shop')">Sklep</button>
-<button onclick="show('cart')">🛒 Koszyk</button>
-<button onclick="show('coupons')">🎟️ Bony</button>
-<button onclick="ownerLogin()">Panel właściciela</button>
-</nav>
+  <h1>Kamil3D</h1>
+  <p>Twoje pomysły – nasze wydruki 3D</p>
 </header>
 
+<nav>
+  <button data-page="shop">Sklep</button>
+  <button data-page="cart">Koszyk (<span id="cartCount">0</span>)</button>
+  <button data-page="contact">Kontakt</button>
+  <button id="ownerButton" class="secondary">Panel administratora</button>
+</nav>
+
 <main>
-<section id="shop">
-<h2>Nasze produkty</h2>
-<div class="products" id="products"></div>
-</section>
+<div id="shop" class="page active">
+  <h2>Nasze produkty</h2>
+  <p>Wybierz produkt i dodaj go do koszyka.</p>
+  <div class="grid" id="products"></div>
+</div>
 
-<section id="cart" class="panel" style="display:none">
-<h2>🛒 Twój koszyk</h2>
-<div id="cartItems">Koszyk jest pusty.</div>
-<h3 id="total">Razem: 0 zł</h3>
-<button onclick="clearCart()">Wyczyść koszyk</button>
-<button onclick="order()">Złóż zamówienie (demo)</button>
-<p><small>Zamówienie jest demonstracyjne. Nie wysyła danych ani nie przyjmuje płatności.</small></p>
-</section>
+<div id="cart" class="page">
+  <h2>Twój koszyk</h2>
+  <div id="cartItems"></div>
+  <h3>Razem: <span id="total">0,00 zł</span></h3>
 
-<section id="coupons" class="panel" style="display:none">
-<h2>🎟️ Bony demonstracyjne</h2>
-<p>Wybierz bon:</p>
-<div id="couponList"></div>
-<p id="couponInfo"></p>
-</section>
+  <label>Kod bonu</label>
+  <div class="row">
+    <input id="couponInput"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+      placeholder="Wpisz kod bonu">
+    <button id="applyCoupon">Zastosuj</button>
+  </div>
+  <p id="couponMessage"></p>
+  <button id="checkoutButton">Złóż zamówienie</button>
+</div>
 
-<section id="owner" class="panel">
-<h2>👑 Panel właściciela</h2>
-<p>Podgląd demonstracyjny sklepu.</p>
-<p>Produktów: 16</p>
-<p>Dostępnych kolorów: 7</p>
-<p>Bonów: 20</p>
-<p><small>Panel nie jest zabezpieczony i nie zapisuje zamówień na serwerze.</small></p>
-<button onclick="show('shop')">Wróć do sklepu</button>
-</section>
+<div id="contact" class="page">
+  <h2>Kontakt</h2>
+  <p>Kamil3D – sklep z wydrukami 3D.</p>
+  <p>Strona:
+    <a href="https://kamilkorzen300-droid.github.io/Kamil3D/">Kamil3D</a>
+  </p>
+</div>
+
+<div id="admin" class="page">
+  <h2>Panel administratora</h2>
+  <div class="notice">Witaj w panelu właściciela Kamil3D!</div>
+
+  <h3>Statystyki</h3>
+  <div class="grid">
+    <div class="card"><h3>Produkty</h3><p id="productStat">16</p></div>
+    <div class="card"><h3>Kody bonów</h3><p id="couponStat">0</p></div>
+    <div class="card"><h3>Wartość koszyka</h3><p id="adminTotal">0 zł</p></div>
+  </div>
+
+  <h3>Generowanie bonów</h3>
+  <label>Rodzaj bonu</label>
+  <select id="couponType">
+    <option value="10">Rabat 10%</option>
+    <option value="20">Rabat 20%</option>
+    <option value="50">Rabat 50%</option>
+    <option value="free">Darmowy produkt</option>
+  </select>
+  <button id="generateCoupon">Wygeneruj kod 16-cyfrowy</button>
+  <div id="generatedCoupons" class="notice"></div>
+
+  <h3>Lista bonów</h3>
+  <div id="couponList"></div>
+  <button id="logoutButton" class="secondary">Wyloguj z panelu</button>
+</div>
 </main>
 
-<script>
-const products=[
-["Króliczek","15 zł","🐰"],["Smok","35 zł","🐉"],
-["Serce","12 zł","❤️"],["Kot","15 zł","🐱"],
-["Robot","25 zł","🤖"],["Gwiazda","12 zł","⭐"],
-["Dinozaur","18 zł","🦖"],["Samochód","25 zł","🚗"],
-["Stojak na telefon","30 zł","📱"],["Miś","30 zł","🧸"],
-["Księżyc","12 zł","🌙"],["Chmurka","12 zł","☁️"],
-["Mini wazon","25 zł","🏺"],["Piłka","15 zł","⚽"],
-["Ozdoba","20 zł","✨"],["Niespodzianka","15 zł","🎁"]
-];
-const colors=["Czerwony","Niebieski","Zielony","Żółty","Czarny","Biały","Fioletowy"];
-const colorCodes=["#ef4444","#3b82f6","#22c55e","#eab308","#171717","#ffffff","#9b59ff"];
-let cart=[];
-let selected={};
-let selectedCoupon="";
-
-function renderProducts(){
-document.getElementById("products").innerHTML=products.map((p,i)=>`
-<div class="card">
-<div class="picture">${p[2]}</div>
-<h3>${p[0]}</h3>
-<div class="price">${p[1]}</div>
-<p>Wybierz kolor:</p>
-<div class="colors">
-${colors.map((c,j)=>`<span title="${c}" class="color" style="background:${colorCodes[j]}" onclick="choose(${i},${j},this)"></span>`).join("")}
+<div class="modal" id="loginModal">
+  <div class="modal-box">
+    <button class="close" id="closeLogin">X</button>
+    <h2>Logowanie administratora</h2>
+    <p>Podaj kod dostępu:</p>
+    <input id="adminPassword" type="password"
+      placeholder="Wpisz kod administratora" autocomplete="off">
+    <p id="loginError" style="color:#ff7777"></p>
+    <button id="loginButton">Zaloguj</button>
+  </div>
 </div>
-<p id="chosen${i}"><small>Nie wybrano koloru</small></p>
-<button onclick="add(${i})">Dodaj do koszyka</button>
-</div>`).join("");
+
+<div class="modal" id="orderModal">
+  <div class="modal-box">
+    <button class="close" id="closeOrder">X</button>
+    <h2>Zamówienie – DEMO</h2>
+    <form id="orderForm">
+      <label>Imię i nazwisko</label>
+      <input required placeholder="Twoje imię">
+      <label>Telefon</label>
+      <input required type="tel" placeholder="Telefon">
+      <label>E-mail</label>
+      <input required type="email" placeholder="E-mail">
+      <label>Ulica i numer</label>
+      <input required placeholder="Adres">
+      <label>Kod pocztowy</label>
+      <input required placeholder="00-000">
+      <label>Miasto</label>
+      <input required placeholder="Miasto">
+      <label>Uwagi</label>
+      <textarea placeholder="Dodatkowe informacje"></textarea>
+      <button type="submit">Potwierdź zamówienie DEMO</button>
+    </form>
+  </div>
+</div>
+
+<footer>© 2026 Kamil3D – Druk 3D</footer>
+
+<script>
+"use strict";
+
+const products = [
+["Brelok serce","💜",8],
+["Brelok kot","🐱",10],
+["Brelok pies","🐶",10],
+["Brelok królik","🐰",10],
+["Brelok gwiazda","⭐",8],
+["Brelok gaming","🎮",12],
+["Stojak na telefon","📱",20],
+["Organizer","🗂️",25],
+["Figurka smok","🐉",25],
+["Figurka robot","🤖",20],
+["Podstawka","🪴",15],
+["Wazon","🏺",30],
+["Brelok piłka","⚽",10],
+["Mini samochód","🚗",18],
+["Dekoracja","✨",20],
+["Własny projekt","🖨️",35]
+];
+
+const colors = [
+"Czarny","Biały","Czerwony","Niebieski",
+"Zielony","Fioletowy","Żółty"
+];
+
+let cart = [];
+let selectedCoupon = null;
+let coupons = [];
+
+try {
+  coupons = JSON.parse(localStorage.getItem("kamil3d_bons") || "[]");
+  if (!Array.isArray(coupons)) coupons = [];
+} catch(e) {
+  coupons = [];
 }
 
-function choose(i,j,el){
-selected[i]=j;
-document.getElementById("chosen"+i).innerText=colors[j];
-el.style.outline="3px solid #a78bfa";
+let adminLogged = false;
+const $ = id => document.getElementById(id);
+
+function showPage(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  $(name).classList.add("active");
+  if(name === "admin") renderCoupons();
+  if(name === "cart") renderCart();
 }
 
-function add(i){
-if(selected[i]===undefined){alert("Najpierw wybierz kolor!");return}
-cart.push({name:products[i][0],price:Number(products[i][1].replace(" zł","")),color:colors[selected[i]]});
-renderCart();
-alert("Dodano produkt do koszyka!");
+document.querySelectorAll("[data-page]").forEach(button => {
+  button.addEventListener("click", () => showPage(button.dataset.page));
+});
+
+function renderProducts() {
+  $("products").innerHTML = "";
+
+  products.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="product-icon">${p[1]}</div>
+      <h3>${p[0]}</h3>
+      <p class="price">${p[2].toFixed(2)} zł</p>
+      <label>Kolor</label>
+      <select class="color">
+        ${colors.map(c => `<option>${c}</option>`).join("")}
+      </select>
+      <button class="add">Dodaj do koszyka</button>
+    `;
+
+    card.querySelector(".add").addEventListener("click", () => {
+      cart.push({
+        name:p[0],
+        price:p[2],
+        color:card.querySelector(".color").value
+      });
+      renderCart();
+      alert("Dodano produkt do koszyka!");
+    });
+
+    $("products").appendChild(card);
+  });
+
+  $("productStat").textContent = products.length;
 }
 
-function renderCart(){
-let box=document.getElementById("cartItems");
-if(!cart.length)box.innerHTML="Koszyk jest pusty.";
-else box.innerHTML=cart.map((p,i)=>`
-<p>${p.name} — ${p.color} — ${p.price} zł
-<button onclick="removeItem(${i})">Usuń</button></p>`).join("");
-let sum=cart.reduce((s,p)=>s+p.price,0);
-document.getElementById("total").innerText="Razem: "+sum+" zł";
-}
-function removeItem(i){cart.splice(i,1);renderCart()}
-function clearCart(){cart=[];renderCart()}
-function order(){alert("To tylko demonstracja. Zamówienie nie zostało wysłane.")}
-function show(id){
-["shop","cart","coupons","owner"].forEach(x=>document.getElementById(x).style.display=x===id?"block":"none");
-}
-function ownerLogin(){
-let code=prompt("Kod panelu właściciela:");
-if(code==="2137&&")show("owner");
-else if(code!==null)alert("Nieprawidłowy kod.");
+function getTotal() {
+  let total = cart.reduce((s,p) => s + p.price, 0);
+
+  if(selectedCoupon) {
+    if(selectedCoupon.type === "free" && cart.length) {
+      total -= cart[0].price;
+    } else if(selectedCoupon.type !== "free") {
+      total *= 1 - Number(selectedCoupon.type)/100;
+    }
+  }
+
+  return Math.max(0,total);
 }
 
-const coupons=[];
-for(let i=1;i<=10;i++)coupons.push("BON"+String(i).padStart(2,"0")+" — "+(5*i)+"% rabatu");
-for(let i=1;i<=10;i++)coupons.push("FREE"+String(i).padStart(2,"0")+" — darmowy produkt");
-document.getElementById("couponList").innerHTML=coupons.map(c=>
-`<p><button onclick="selectCoupon('${c}')">${c}</button></p>`).join("");
-function selectCoupon(c){
-selectedCoupon=c;
-document.getElementById("couponInfo").innerText="Wybrano: "+c+" (bon demonstracyjny)";
+function renderCart() {
+  $("cartCount").textContent = cart.length;
+  $("cartItems").innerHTML = "";
+
+  cart.forEach((item,i) => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.textContent = item.name + " – " + item.color + " – " + item.price + " zł ";
+
+    const remove = document.createElement("button");
+    remove.textContent = "Usuń";
+    remove.className = "secondary";
+    remove.addEventListener("click", () => {
+      cart.splice(i,1);
+      renderCart();
+    });
+
+    div.appendChild(remove);
+    $("cartItems").appendChild(div);
+  });
+
+  $("total").textContent = getTotal().toFixed(2) + " zł";
+  $("adminTotal").textContent = getTotal().toFixed(2) + " zł";
 }
+
+function saveCoupons() {
+  localStorage.setItem("kamil3d_bons",JSON.stringify(coupons));
+}
+
+function generateCode() {
+  const array = new Uint32Array(4);
+  crypto.getRandomValues(array);
+  return Array.from(array).map(n =>
+    String(n % 10000).padStart(4,"0")
+  ).join("");
+}
+
+$("ownerButton").addEventListener("click", () => {
+  $("adminPassword").value = "";
+  $("loginError").textContent = "";
+  $("loginModal").classList.add("show");
+  setTimeout(() => $("adminPassword").focus(),300);
+});
+
+$("closeLogin").addEventListener("click", () => {
+  $("loginModal").classList.remove("show");
+});
+
+function login() {
+  if($("adminPassword").value === "2137&&") {
+    adminLogged = true;
+    $("loginModal").classList.remove("show");
+    showPage("admin");
+  } else {
+    $("loginError").textContent = "Nieprawidłowy kod!";
+    $("adminPassword").value = "";
+    $("adminPassword").focus();
+  }
+}
+
+$("loginButton").addEventListener("click",login);
+$("adminPassword").addEventListener("keydown",e => {
+  if(e.key === "Enter") login();
+});
+
+$("logoutButton").addEventListener("click",() => {
+  adminLogged = false;
+  showPage("shop");
+});
+
+$("generateCoupon").addEventListener("click",() => {
+  if(!adminLogged) return;
+
+  let code;
+  do {
+    code = generateCode();
+  } while(coupons.some(c => c.code === code));
+
+  const type = $("couponType").value;
+  coupons.push({code,type,used:false});
+  saveCoupons();
+  renderCoupons();
+  $("generatedCoupons").textContent = "Nowy kod: " + code;
+});
+
+function renderCoupons() {
+  if(!adminLogged) return;
+  $("couponStat").textContent = coupons.length;
+  $("couponList").innerHTML = "";
+
+  coupons.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.textContent =
+      c.code + " – " +
+      (c.type === "free" ? "Darmowy produkt" : "Rabat " + c.type + "%") +
+      " – " + (c.used ? "Użyty" : "Aktywny");
+    $("couponList").appendChild(div);
+  });
+}
+
+$("applyCoupon").addEventListener("click",() => {
+  const code = $("couponInput").value.trim();
+  const coupon = coupons.find(c => c.code === code && !c.used);
+
+  if(!coupon) {
+    $("couponMessage").textContent = "Nieprawidłowy lub wykorzystany kod.";
+    return;
+  }
+
+  selectedCoupon = coupon;
+  $("couponMessage").textContent = "Bon zastosowany!";
+  renderCart();
+});
+
+$("checkoutButton").addEventListener("click",() => {
+  if(!cart.length) {
+    alert("Koszyk jest pusty!");
+    return;
+  }
+  $("orderModal").classList.add("show");
+});
+
+$("closeOrder").addEventListener("click",() => {
+  $("orderModal").classList.remove("show");
+});
+
+$("orderForm").addEventListener("submit",e => {
+  e.preventDefault();
+
+  if(selectedCoupon) {
+    selectedCoupon.used = true;
+    saveCoupons();
+  }
+
+  alert("Dziękujemy! Zamówienie DEMO zostało złożone.");
+
+  cart = [];
+  selectedCoupon = null;
+  $("couponInput").value = "";
+  $("couponMessage").textContent = "";
+  $("orderForm").reset();
+  $("orderModal").classList.remove("show");
+
+  renderCart();
+  showPage("shop");
+});
+
 renderProducts();
 renderCart();
 </script>
