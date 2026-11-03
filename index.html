@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kamil3D.pl</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101116;color:#fff;font-family:Arial,sans-serif}
+header{background:#191a22;padding:22px;text-align:center;border-bottom:1px solid #333}
+header h1{color:#9b85ff;margin:0;font-size:32px}
+nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:15px}
+button,select{background:#8065ff;color:white;border:0;border-radius:9px;padding:11px;cursor:pointer}
+button:hover{background:#6548df}
+main{max-width:1100px;margin:auto;padding:20px}
+h2{color:#b5a5ff}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:17px}
+.card,.panel{background:#20212b;border:1px solid #343542;border-radius:15px;padding:17px}
+.card{text-align:center}
+.picture{font-size:65px;padding:15px}
+.price{color:#b6a5ff;font-weight:bold;font-size:20px}
+.colors{display:flex;justify-content:center;gap:8px;margin:12px}
+.color{width:23px;height:23px;border-radius:50%;border:2px solid white;cursor:pointer}
+#cart,#owner,#coupons{margin-top:25px}
+#owner{display:none}
+input{padding:10px;border-radius:8px;border:1px solid #555;background:#14151b;color:white}
+small{color:#aaa}
+</style>
+</head>
+<body>
+<header>
+<h1>✨ Kamil3D.pl</h1>
+<p>Wyjątkowe wydruki 3D</p>
+<nav>
+<button onclick="show('shop')">Sklep</button>
+<button onclick="show('cart')">🛒 Koszyk</button>
+<button onclick="show('coupons')">🎟️ Bony</button>
+<button onclick="ownerLogin()">Panel właściciela</button>
+</nav>
+</header>
+
+<main>
+<section id="shop">
+<h2>Nasze produkty</h2>
+<div class="products" id="products"></div>
+</section>
+
+<section id="cart" class="panel" style="display:none">
+<h2>🛒 Twój koszyk</h2>
+<div id="cartItems">Koszyk jest pusty.</div>
+<h3 id="total">Razem: 0 zł</h3>
+<button onclick="clearCart()">Wyczyść koszyk</button>
+<button onclick="order()">Złóż zamówienie (demo)</button>
+<p><small>Zamówienie jest demonstracyjne. Nie wysyła danych ani nie przyjmuje płatności.</small></p>
+</section>
+
+<section id="coupons" class="panel" style="display:none">
+<h2>🎟️ Bony demonstracyjne</h2>
+<p>Wybierz bon:</p>
+<div id="couponList"></div>
+<p id="couponInfo"></p>
+</section>
+
+<section id="owner" class="panel">
+<h2>👑 Panel właściciela</h2>
+<p>Podgląd demonstracyjny sklepu.</p>
+<p>Produktów: 16</p>
+<p>Dostępnych kolorów: 7</p>
+<p>Bonów: 20</p>
+<p><small>Panel nie jest zabezpieczony i nie zapisuje zamówień na serwerze.</small></p>
+<button onclick="show('shop')">Wróć do sklepu</button>
+</section>
+</main>
+
+<script>
+const products=[
+["Króliczek","15 zł","🐰"],["Smok","35 zł","🐉"],
+["Serce","12 zł","❤️"],["Kot","15 zł","🐱"],
+["Robot","25 zł","🤖"],["Gwiazda","12 zł","⭐"],
+["Dinozaur","18 zł","🦖"],["Samochód","25 zł","🚗"],
+["Stojak na telefon","30 zł","📱"],["Miś","30 zł","🧸"],
+["Księżyc","12 zł","🌙"],["Chmurka","12 zł","☁️"],
+["Mini wazon","25 zł","🏺"],["Piłka","15 zł","⚽"],
+["Ozdoba","20 zł","✨"],["Niespodzianka","15 zł","🎁"]
+];
+const colors=["Czerwony","Niebieski","Zielony","Żółty","Czarny","Biały","Fioletowy"];
+const colorCodes=["#ef4444","#3b82f6","#22c55e","#eab308","#171717","#ffffff","#9b59ff"];
+let cart=[];
+let selected={};
+let selectedCoupon="";
+
+function renderProducts(){
+document.getElementById("products").innerHTML=products.map((p,i)=>`
+<div class="card">
+<div class="picture">${p[2]}</div>
+<h3>${p[0]}</h3>
+<div class="price">${p[1]}</div>
+<p>Wybierz kolor:</p>
+<div class="colors">
+${colors.map((c,j)=>`<span title="${c}" class="color" style="background:${colorCodes[j]}" onclick="choose(${i},${j},this)"></span>`).join("")}
+</div>
+<p id="chosen${i}"><small>Nie wybrano koloru</small></p>
+<button onclick="add(${i})">Dodaj do koszyka</button>
+</div>`).join("");
+}
+
+function choose(i,j,el){
+selected[i]=j;
+document.getElementById("chosen"+i).innerText=colors[j];
+el.style.outline="3px solid #a78bfa";
+}
+
+function add(i){
+if(selected[i]===undefined){alert("Najpierw wybierz kolor!");return}
+cart.push({name:products[i][0],price:Number(products[i][1].replace(" zł","")),color:colors[selected[i]]});
+renderCart();
+alert("Dodano produkt do koszyka!");
+}
+
+function renderCart(){
+let box=document.getElementById("cartItems");
+if(!cart.length)box.innerHTML="Koszyk jest pusty.";
+else box.innerHTML=cart.map((p,i)=>`
+<p>${p.name} — ${p.color} — ${p.price} zł
+<button onclick="removeItem(${i})">Usuń</button></p>`).join("");
+let sum=cart.reduce((s,p)=>s+p.price,0);
+document.getElementById("total").innerText="Razem: "+sum+" zł";
+}
+function removeItem(i){cart.splice(i,1);renderCart()}
+function clearCart(){cart=[];renderCart()}
+function order(){alert("To tylko demonstracja. Zamówienie nie zostało wysłane.")}
+function show(id){
+["shop","cart","coupons","owner"].forEach(x=>document.getElementById(x).style.display=x===id?"block":"none");
+}
+function ownerLogin(){
+let code=prompt("Kod panelu właściciela:");
+if(code==="2137&&")show("owner");
+else if(code!==null)alert("Nieprawidłowy kod.");
+}
+
+const coupons=[];
+for(let i=1;i<=10;i++)coupons.push("BON"+String(i).padStart(2,"0")+" — "+(5*i)+"% rabatu");
+for(let i=1;i<=10;i++)coupons.push("FREE"+String(i).padStart(2,"0")+" — darmowy produkt");
+document.getElementById("couponList").innerHTML=coupons.map(c=>
+`<p><button onclick="selectCoupon('${c}')">${c}</button></p>`).join("");
+function selectCoupon(c){
+selectedCoupon=c;
+document.getElementById("couponInfo").innerText="Wybrano: "+c+" (bon demonstracyjny)";
+}
+renderProducts();
+renderCart();
+</script>
+</body>
+</html>
